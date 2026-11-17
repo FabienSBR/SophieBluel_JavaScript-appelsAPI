@@ -1,40 +1,71 @@
 
-const gallery = document.querySelector('.gallery');
+const filters = document.getElementById('filters');
 
-const createFigures = (works) => {
-    gallery.innerHTML = '';
+// Création des boutons de filtres
+const generateBtn = async () => {
+    let categories;
 
-    works.forEach((work) => {
-        gallery.insertAdjacentHTML('beforeend', `
-            <figure id="${work.id}">
-                <img src="${work.imageUrl}" alt="${work.title}">
-                <figcaption>${work.title}</figcaption>
-            </figure>
-        `);
+    if (window.isDemoMode) {
+        categories = window.demoCategories;
+    } else {
+        categories = await getCategories();
+    }
+
+    window.sessionStorage.setItem(
+        'categories',
+        JSON.stringify(categories)
+    );
+
+    // Bouton Tous
+    if (!document.getElementById('0')) {
+        filters.insertAdjacentHTML(
+            'afterbegin',
+            '<button id="0" class="filter">Tous</button>'
+        );
+    }
+
+    // Boutons des catégories
+    categories.forEach(category => {
+        const btn = `
+            <button id="${category.id}" class="filter">
+                ${category.name}
+            </button>
+        `;
+
+        filters.insertAdjacentHTML('beforeend', btn);
     });
 };
 
-const stockWorks = async () => {
-    const works = await getWorks();
-    const worksList = JSON.stringify(works);
-    window.sessionStorage.setItem('works', worksList);
+// Gestion du filtrage
+const sortWorks = () => {
+    const sortButtons = document.querySelectorAll('.filter');
+
+    sortButtons.forEach(sortButton => {
+        sortButton.addEventListener('click', (event) => {
+            const localWorks = JSON.parse(
+                window.sessionStorage.getItem('works')
+            ) || [];
+
+            const selectedId = event.currentTarget.id;
+
+            if (selectedId === '0') {
+                createFigures(localWorks);
+                return;
+            }
+
+            const selectedWorks = localWorks.filter(
+                work => work.categoryId == selectedId
+            );
+
+            createFigures(selectedWorks);
+        });
+    });
 };
 
-const genererProjects = async () => {
-    const isDemo = window.location.hostname.endsWith('github.io');
-
-    if (isDemo) {
-        createFigures(demoWorks);
-        return;
-    }
-
-    await stockWorks();
-
-    const works = JSON.parse(
-        window.sessionStorage.getItem('works')
-    );
-
-    createFigures(works);
+// Initialisation
+const manageCategories = async () => {
+    await generateBtn();
+    sortWorks();
 };
 
-genererProjects();
+manageCategories();
