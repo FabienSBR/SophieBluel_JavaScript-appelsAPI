@@ -16,7 +16,7 @@ const createFigures = (works) => {
     });
 };
 
-/** Stockage et récupération des projets */
+/** Chargement des projets */
 const genererProjects = async () => {
 
     // Version GitHub Pages : données statiques
@@ -44,7 +44,10 @@ const genererProjects = async () => {
         createFigures(works);
 
     } catch (error) {
-        console.error("Erreur lors du chargement des projets :", error);
+        console.error(
+            "Erreur lors du chargement des projets :",
+            error
+        );
     }
 };
 
