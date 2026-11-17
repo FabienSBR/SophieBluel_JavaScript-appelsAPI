@@ -1,6 +1,6 @@
 
 // Détection de la version hébergée sur GitHub Pages
-window.isDemoMode = window.location.hostname.endsWith("github.io");
+window.isDemoMode = true;
 
 // Données statiques pour la démonstration
 window.demoWorks = [
