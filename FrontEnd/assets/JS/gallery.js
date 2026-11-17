@@ -1,71 +1,47 @@
+/** RECUPERATION DES PROJETS DEPUIS L'API, STOCKAGE LOCAL DANS LE NAVIGATEUR ET AFFICHAGE DYNAMIQUE SUR UNE PAGE WEB */
 
-const filters = document.getElementById('filters');
 
-// Création des boutons de filtres
-const generateBtn = async () => {
-    let categories;
+/** Sélection de l'élément HTML avec la classe "gallery" dans le DOM ; cet élément sera utilisé pour afficher les projets */
 
-    if (window.isDemoMode) {
-        categories = window.demoCategories;
-    } else {
-        categories = await getCategories();
-    }
+const gallery = document.querySelector('.gallery');
 
-    window.sessionStorage.setItem(
-        'categories',
-        JSON.stringify(categories)
-    );
 
-    // Bouton Tous
-    if (!document.getElementById('0')) {
-        filters.insertAdjacentHTML(
-            'afterbegin',
-            '<button id="0" class="filter">Tous</button>'
-        );
-    }
+/** Génération d'un élément HTML 'figure' ajouté à la gallerie depuis la liste de projets 'works' */
 
-    // Boutons des catégories
-    categories.forEach(category => {
-        const btn = `
-            <button id="${category.id}" class="filter">
-                ${category.name}
-            </button>
-        `;
-
-        filters.insertAdjacentHTML('beforeend', btn);
+const createFigures = (works) => {
+    works.forEach((work) => {
+        gallery.insertAdjacentHTML('beforeend', `
+            <figure id="${work.id}">
+                <img src="${work.imageUrl}" alt="${work.title}">
+                <figcaption>${work.title}</figcaption>
+            </figure>
+        `)
     });
-};
+}
 
-// Gestion du filtrage
-const sortWorks = () => {
-    const sortButtons = document.querySelectorAll('.filter');
 
-    sortButtons.forEach(sortButton => {
-        sortButton.addEventListener('click', (event) => {
-            const localWorks = JSON.parse(
-                window.sessionStorage.getItem('works')
-            ) || [];
+/** Stockage local au sein du navigateur des projets récupérés depuis l'API */
 
-            const selectedId = event.currentTarget.id;
+const stockWorks = async () => {
+    const works = await getWorks();
+    const worksList = JSON.stringify(works);
+    window.sessionStorage.setItem('works', worksList);
+}
 
-            if (selectedId === '0') {
-                createFigures(localWorks);
-                return;
-            }
 
-            const selectedWorks = localWorks.filter(
-                work => work.categoryId == selectedId
-            );
+/** Affichage des projets sur la page du navigateur */
 
-            createFigures(selectedWorks);
-        });
-    });
-};
+const genererProjects = async () => {
+    await stockWorks();
 
-// Initialisation
-const manageCategories = async () => {
-    await generateBtn();
-    sortWorks();
-};
+    const works = JSON.parse(window.sessionStorage.getItem('works'))
 
-manageCategories();
+    createFigures(works);
+}
+
+/** Appel de la fonction 'genererProjects' : déclenche le processus de chargement du script */
+
+genererProjects();
+
+
+
