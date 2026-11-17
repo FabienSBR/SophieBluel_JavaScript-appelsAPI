@@ -1,47 +1,52 @@
-/** RECUPERATION DES PROJETS DEPUIS L'API, STOCKAGE LOCAL DANS LE NAVIGATEUR ET AFFICHAGE DYNAMIQUE SUR UNE PAGE WEB */
 
-
-/** Sélection de l'élément HTML avec la classe "gallery" dans le DOM ; cet élément sera utilisé pour afficher les projets */
-
+/** Sélection de la galerie */
 const gallery = document.querySelector('.gallery');
 
-
-/** Génération d'un élément HTML 'figure' ajouté à la gallerie depuis la liste de projets 'works' */
-
+/** Génération des projets dans la galerie */
 const createFigures = (works) => {
+    gallery.innerHTML = "";
+
     works.forEach((work) => {
         gallery.insertAdjacentHTML('beforeend', `
             <figure id="${work.id}">
                 <img src="${work.imageUrl}" alt="${work.title}">
                 <figcaption>${work.title}</figcaption>
             </figure>
-        `)
+        `);
     });
-}
+};
 
-
-/** Stockage local au sein du navigateur des projets récupérés depuis l'API */
-
-const stockWorks = async () => {
-    const works = await getWorks();
-    const worksList = JSON.stringify(works);
-    window.sessionStorage.setItem('works', worksList);
-}
-
-
-/** Affichage des projets sur la page du navigateur */
-
+/** Stockage et récupération des projets */
 const genererProjects = async () => {
-    await stockWorks();
 
-    const works = JSON.parse(window.sessionStorage.getItem('works'))
+    // Version GitHub Pages : données statiques
+    if (window.isDemoMode) {
+        const works = window.demoWorks;
 
-    createFigures(works);
-}
+        window.sessionStorage.setItem(
+            'works',
+            JSON.stringify(works)
+        );
 
-/** Appel de la fonction 'genererProjects' : déclenche le processus de chargement du script */
+        createFigures(works);
+        return;
+    }
 
+    // Version locale : récupération depuis l'API
+    try {
+        const works = await getWorks();
+
+        window.sessionStorage.setItem(
+            'works',
+            JSON.stringify(works)
+        );
+
+        createFigures(works);
+
+    } catch (error) {
+        console.error("Erreur lors du chargement des projets :", error);
+    }
+};
+
+/** Lancement */
 genererProjects();
-
-
-
